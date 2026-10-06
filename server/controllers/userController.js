@@ -30,8 +30,16 @@ export const addAddress = async (req, res) => {
 export const updateAddress = async (req, res) => {
   const { idx } = req.params
   const user = await User.findById(req.user._id)
-  if (!user.addresses[idx]) return errorResponse(res, 'Address not found', 404)
-  user.addresses[idx] = { ...user.addresses[idx].toObject(), ...req.body }
+  if (!user) return errorResponse(res, 'User not found', 404)
+
+  let address = user.addresses.id(idx)
+  if (!address && /^\d+$/.test(idx)) {
+    address = user.addresses[parseInt(idx, 10)]
+  }
+
+  if (!address) return errorResponse(res, 'Address not found', 404)
+
+  Object.assign(address, req.body)
   await user.save()
   return successResponse(res, { addresses: user.addresses }, 'Address updated')
 }
@@ -39,8 +47,17 @@ export const updateAddress = async (req, res) => {
 export const deleteAddress = async (req, res) => {
   const { idx } = req.params
   const user = await User.findById(req.user._id)
-  if (!user.addresses[idx]) return errorResponse(res, 'Address not found', 404)
-  user.addresses.splice(idx, 1)
+  if (!user) return errorResponse(res, 'User not found', 404)
+
+  const address = user.addresses.id(idx)
+  if (address) {
+    user.addresses.pull(address._id)
+  } else if (/^\d+$/.test(idx) && user.addresses[parseInt(idx, 10)]) {
+    user.addresses.splice(parseInt(idx, 10), 1)
+  } else {
+    return errorResponse(res, 'Address not found', 404)
+  }
+
   await user.save()
   return successResponse(res, { addresses: user.addresses }, 'Address removed')
 }

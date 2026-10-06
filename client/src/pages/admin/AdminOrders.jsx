@@ -217,7 +217,7 @@ export default function AdminOrders() {
               <p className="text-sm font-medium text-gray-800">{selectedOrder.user?.name}</p>
               <p className="text-xs text-gray-500">{selectedOrder.user?.email}</p>
               {selectedOrder.user?.phone && (
-                <p className="text-xs text-gray-500">📞 {selectedOrder.user.phone}</p>
+                <p className="text-xs text-gray-500">{selectedOrder.user.phone}</p>
               )}
             </div>
 
@@ -260,7 +260,7 @@ export default function AdminOrders() {
                 {selectedOrder.deliveryAddress?.state} - {selectedOrder.deliveryAddress?.pincode}
               </p>
               {selectedOrder.deliveryAddress?.phone && (
-                <p className="text-xs text-gray-500 mt-1">📞 {selectedOrder.deliveryAddress.phone}</p>
+                <p className="text-xs text-gray-500 mt-1">{selectedOrder.deliveryAddress.phone}</p>
               )}
             </div>
 
@@ -273,8 +273,8 @@ export default function AdminOrders() {
                     onClick={() => handleStatusChange(selectedOrder._id, s)}
                     disabled={selectedOrder.orderStatus === s || updatingStatus}
                     className={`text-xs font-medium px-3 py-1.5 rounded-xl transition-colors ${selectedOrder.orderStatus === s
-                        ? 'bg-orange-500 text-white'
-                        : 'border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50'
+                      ? 'bg-orange-500 text-white'
+                      : 'border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50'
                       }`}
                   >
                     {s}

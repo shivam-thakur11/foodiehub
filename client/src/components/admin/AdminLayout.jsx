@@ -22,10 +22,9 @@ export default function AdminLayout() {
   const handleLogout = () => { logout(); navigate('/') }
 
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-      isActive
-        ? 'bg-orange-500 text-white shadow-sm'
-        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+    `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive
+      ? 'bg-orange-500 text-white shadow-sm'
+      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
     }`
 
   const Sidebar = () => (

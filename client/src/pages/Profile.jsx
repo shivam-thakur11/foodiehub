@@ -176,7 +176,7 @@ export default function Profile() {
                     <p className="text-sm text-gray-600 leading-relaxed">
                       {addr.street}, {addr.city}, {addr.state} - {addr.pincode}
                     </p>
-                    {addr.phone && <p className="text-xs text-gray-400 mt-1">📞 {addr.phone}</p>}
+                    {addr.phone && <p className="text-xs text-gray-400 mt-1">{addr.phone}</p>}
                   </div>
                 )
               })}

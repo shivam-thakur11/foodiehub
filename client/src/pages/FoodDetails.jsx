@@ -26,7 +26,7 @@ export default function FoodDetails() {
   const [reviewHover, setReviewHover] = useState(0)
   const [submittingReview, setSubmittingReview] = useState(false)
 
-  const fallback = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&h=600&fit=crop'
+  const fallback = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' fill='%23f9fafb'%3E%3Crect width='800' height='600' fill='%23f3f4f6'/%3E%3Cg fill='%239ca3af'%3E%3Ccircle cx='400' cy='280' r='90' fill='%23e5e7eb' stroke='%23d1d5db' stroke-width='6'/%3E%3Cpath d='M350 280c0-28 22-50 50-50s50 22 50 50-22 50-50 50-50-22-50-50z' fill='%23d1d5db'/%3E%3C/g%3E%3Ctext x='50%25' y='460' font-family='system-ui, sans-serif' font-size='24' font-weight='600' fill='%239ca3af' text-anchor='middle'%3EFoodieHub%3C/text%3E%3C/svg%3E"
 
   const loadFood = () => {
     setLoading(true)
@@ -113,7 +113,7 @@ export default function FoodDetails() {
             <span className="text-xs font-semibold text-orange-500 bg-orange-50 px-3 py-1 rounded-full">
               {food.category?.name}
             </span>
-            {food.isVegetarian ? (
+            {(food.isVegetarian || food.isVeg) ? (
               <span className="flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">
                 <Leaf className="w-3 h-3" /> Vegetarian
               </span>
@@ -217,9 +217,9 @@ export default function FoodDetails() {
             ))}
           </div>
         ) : (
-          <div className="bg-gray-50 rounded-2xl p-8 text-center mb-8 border border-gray-100">
-            <p className="text-3xl mb-2">⭐</p>
-            <p className="text-gray-500 text-sm">No reviews yet. Be the first to review this dish!</p>
+          <div className="bg-gray-50 rounded-xl p-8 text-center mb-8 border border-gray-100">
+            <Star className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+            <p className="text-gray-500 text-sm">No reviews yet. Be the first to review this dish.</p>
           </div>
         )}
 

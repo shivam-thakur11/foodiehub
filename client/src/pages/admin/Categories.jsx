@@ -53,7 +53,7 @@ export default function AdminCategories() {
   }
 
   const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); setFormErrors(e => ({ ...e, [k]: '' })) }
-  const fallback = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&h=100&fit=crop'
+  const fallback = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23fed7aa'%3E%3Crect width='100' height='100' rx='16' fill='%23fff7ed'/%3E%3Ccircle cx='50' cy='50' r='26' fill='%23ffedd5' stroke='%23fdba74' stroke-width='2'/%3E%3Ccircle cx='50' cy='50' r='14' fill='%23fb923c'/%3E%3C/svg%3E"
 
   return (
     <div className="space-y-5">

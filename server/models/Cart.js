@@ -28,7 +28,11 @@ const cartSchema = new mongoose.Schema(
     },
     items: [cartItemSchema],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 )
 
 // Virtual for cart total

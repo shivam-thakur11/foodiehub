@@ -12,8 +12,14 @@ const TAX_RATE = 0.05
 export const placeOrder = async (req, res) => {
   const { deliveryAddress, paymentMethod = 'COD', notes, items: clientItems, couponCode } = req.body
 
-  if (!deliveryAddress) {
-    return errorResponse(res, 'Delivery address is required.', 400)
+  if (
+    !deliveryAddress ||
+    typeof deliveryAddress !== 'object' ||
+    !deliveryAddress.street?.trim() ||
+    !deliveryAddress.city?.trim() ||
+    !deliveryAddress.pincode?.trim()
+  ) {
+    return errorResponse(res, 'A complete delivery address with street, city, and pincode is required.', 400)
   }
 
   // Use provided items OR pull from cart
@@ -22,19 +28,19 @@ export const placeOrder = async (req, res) => {
   if (clientItems && clientItems.length > 0) {
     // Validate each item against DB to prevent price tampering
     for (const ci of clientItems) {
-      // Validate quantity
-      if (!ci.quantity || ci.quantity < 1 || ci.quantity > 50) {
-        return errorResponse(res, `Invalid quantity for item: ${ci.foodId}. Must be between 1 and 50.`, 400)
+      const parsedQty = parseInt(ci.quantity, 10)
+      if (isNaN(parsedQty) || parsedQty < 1 || parsedQty > 50) {
+        return errorResponse(res, `Invalid quantity for item: ${ci.foodId || 'unknown'}. Must be between 1 and 50.`, 400)
       }
       const food = await Food.findById(ci.foodId)
       if (!food) return errorResponse(res, `Food item not found: ${ci.foodId}`, 404)
-      if (!food.isAvailable) return errorResponse(res, `${food.name} is unavailable.`, 400)
+      if (!food.isAvailable) return errorResponse(res, `"${food.name}" is currently unavailable.`, 400)
       orderItems.push({
         food: food._id,
         name: food.name,
         image: food.image,
         price: food.price, // always use server price
-        quantity: ci.quantity,
+        quantity: parsedQty,
       })
     }
   } else {
@@ -42,23 +48,37 @@ export const placeOrder = async (req, res) => {
     if (!cart || cart.items.length === 0) {
       return errorResponse(res, 'Cart is empty.', 400)
     }
-    orderItems = cart.items.map((item) => ({
-      food: item.food._id,
-      name: item.food.name,
-      image: item.food.image,
-      price: item.food.price,
-      quantity: item.quantity,
-    }))
+
+    for (const item of cart.items) {
+      // Guard against deleted foods
+      if (!item.food) {
+        continue
+      }
+      if (!item.food.isAvailable) {
+        return errorResponse(res, `"${item.food.name}" in your cart is currently unavailable.`, 400)
+      }
+      orderItems.push({
+        food: item.food._id,
+        name: item.food.name,
+        image: item.food.image,
+        price: item.food.price,
+        quantity: item.quantity,
+      })
+    }
+
+    if (orderItems.length === 0) {
+      return errorResponse(res, 'No valid items found in cart.', 400)
+    }
   }
 
-  const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const subtotal = parseFloat(orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2))
   const tax = parseFloat((subtotal * TAX_RATE).toFixed(2))
 
   // Validate and apply coupon
   let discount = 0
   let appliedCoupon = null
   if (couponCode) {
-    const code = couponCode.trim().toUpperCase()
+    const code = String(couponCode).trim().toUpperCase()
     const validCoupons = {
       'WELCOME20': { type: 'percentage', value: 20, minOrder: 0 },
       'SAVE50': { type: 'fixed', value: 50, minOrder: 200 },
@@ -83,7 +103,7 @@ export const placeOrder = async (req, res) => {
     appliedCoupon = code
   }
 
-  const totalAmount = subtotal + DELIVERY_FEE + tax - discount
+  const totalAmount = parseFloat(Math.max(0, subtotal + DELIVERY_FEE + tax - discount).toFixed(2))
 
   const order = await Order.create({
     user: req.user._id,

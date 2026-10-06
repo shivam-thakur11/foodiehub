@@ -6,8 +6,16 @@ import { successResponse, errorResponse } from '../utils/apiResponse.js'
 // @route   GET /api/cart
 // @access  Private
 export const getCart = async (req, res) => {
-  const cart = await Cart.findOne({ user: req.user._id }).populate('items.food')
-  if (!cart) return successResponse(res, { cart: { items: [] } }, 'Cart fetched')
+  let cart = await Cart.findOne({ user: req.user._id }).populate('items.food')
+  if (!cart) return successResponse(res, { cart: { items: [], total: 0 } }, 'Cart fetched')
+
+  // Clean up any orphaned items where the food was deleted from the database
+  const validItems = cart.items.filter((item) => item.food != null)
+  if (validItems.length !== cart.items.length) {
+    cart.items = validItems
+    await cart.save()
+  }
+
   return successResponse(res, { cart }, 'Cart fetched')
 }
 
@@ -17,6 +25,12 @@ export const getCart = async (req, res) => {
 export const addToCart = async (req, res) => {
   const { foodId, quantity = 1 } = req.body
 
+  if (!foodId) {
+    return errorResponse(res, 'Food ID is required.', 400)
+  }
+
+  const parsedQty = Math.max(1, Math.min(50, parseInt(quantity, 10) || 1))
+
   const food = await Food.findById(foodId)
   if (!food) return errorResponse(res, 'Food not found.', 404)
   if (!food.isAvailable) return errorResponse(res, 'This item is currently unavailable.', 400)
@@ -24,16 +38,26 @@ export const addToCart = async (req, res) => {
   let cart = await Cart.findOne({ user: req.user._id })
 
   if (!cart) {
-    cart = await Cart.create({
-      user: req.user._id,
-      items: [{ food: foodId, quantity, price: food.price }],
-    })
-  } else {
-    const existingItem = cart.items.find((item) => item.food.toString() === foodId)
+    try {
+      cart = await Cart.create({
+        user: req.user._id,
+        items: [{ food: foodId, quantity: parsedQty, price: food.price }],
+      })
+    } catch (err) {
+      if (err.code === 11000) {
+        cart = await Cart.findOne({ user: req.user._id })
+      } else {
+        throw err
+      }
+    }
+  }
+
+  if (cart) {
+    const existingItem = cart.items.find((item) => item.food?.toString() === foodId)
     if (existingItem) {
-      existingItem.quantity += quantity
+      existingItem.quantity = Math.min(50, existingItem.quantity + parsedQty)
     } else {
-      cart.items.push({ food: foodId, quantity, price: food.price })
+      cart.items.push({ food: foodId, quantity: parsedQty, price: food.price })
     }
     await cart.save()
   }
@@ -53,10 +77,11 @@ export const updateCartItem = async (req, res) => {
   const item = cart.items.id(req.params.itemId)
   if (!item) return errorResponse(res, 'Item not found in cart.', 404)
 
-  if (quantity <= 0) {
-    item.deleteOne()
+  const parsedQty = parseInt(quantity, 10)
+  if (isNaN(parsedQty) || parsedQty <= 0) {
+    cart.items.pull(req.params.itemId)
   } else {
-    item.quantity = quantity
+    item.quantity = Math.min(50, parsedQty)
   }
 
   await cart.save()
@@ -74,7 +99,7 @@ export const removeCartItem = async (req, res) => {
   const item = cart.items.id(req.params.itemId)
   if (!item) return errorResponse(res, 'Item not found in cart.', 404)
 
-  item.deleteOne()
+  cart.items.pull(req.params.itemId)
   await cart.save()
   await cart.populate('items.food')
   return successResponse(res, { cart }, 'Item removed')

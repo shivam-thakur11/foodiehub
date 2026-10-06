@@ -1,5 +1,6 @@
 import Food from '../models/Food.js'
 import Category from '../models/Category.js'
+import Cart from '../models/Cart.js'
 import { successResponse, errorResponse, paginatedResponse } from '../utils/apiResponse.js'
 
 // @route   GET /api/foods
@@ -12,9 +13,10 @@ export const getFoods = async (req, res) => {
   const query = { isAvailable: true }
 
   if (search) {
+    const escapedSearch = String(search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     query.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
+      { name: { $regex: escapedSearch, $options: 'i' } },
+      { description: { $regex: escapedSearch, $options: 'i' } },
     ]
   }
 
@@ -23,9 +25,9 @@ export const getFoods = async (req, res) => {
     query.category = category
   } else if (categoryName) {
     // Escape regex special characters to prevent injection
-    const escapedName = categoryName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const escapedName = String(categoryName).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const cat = await Category.findOne({ name: { $regex: `^${escapedName}$`, $options: 'i' } })
-    if (cat) query.category = cat._id
+    query.category = cat ? cat._id : null
   }
 
   if (minPrice || maxPrice) {
@@ -35,7 +37,9 @@ export const getFoods = async (req, res) => {
   }
 
   if (rating) query.rating = { $gte: Number(rating) }
-  if (isVegetarian === 'true') query.isVegetarian = true
+  const vegVal = isVegetarian !== undefined ? isVegetarian : req.query.isVeg
+  if (vegVal === 'true' || vegVal === true) query.isVegetarian = true
+  else if (vegVal === 'false' || vegVal === false) query.isVegetarian = false
 
   const sortMap = {
     createdAt: { createdAt: -1 },
@@ -82,10 +86,11 @@ export const createFood = async (req, res) => {
     ? `/uploads/${req.file.filename}`
     : req.body.image || ''
 
+  const isVegVal = isVegetarian !== undefined ? isVegetarian : req.body.isVeg
   const food = await Food.create({
     name, description, price: Number(price), category, image,
     isAvailable: isAvailable !== undefined ? isAvailable === 'true' || isAvailable === true : true,
-    isVegetarian: isVegetarian === 'true' || isVegetarian === true || false,
+    isVegetarian: isVegVal === 'true' || isVegVal === true || false,
     isFeatured: isFeatured === 'true' || isFeatured === true || false,
     preparationTime: preparationTime || 30,
   })
@@ -104,7 +109,8 @@ export const updateFood = async (req, res) => {
   if (updates.price) updates.price = Number(updates.price)
   // Coerce booleans sent as strings
   if (updates.isAvailable !== undefined) updates.isAvailable = updates.isAvailable === 'true' || updates.isAvailable === true
-  if (updates.isVegetarian !== undefined) updates.isVegetarian = updates.isVegetarian === 'true' || updates.isVegetarian === true
+  const updateVeg = updates.isVegetarian !== undefined ? updates.isVegetarian : updates.isVeg
+  if (updateVeg !== undefined) updates.isVegetarian = updateVeg === 'true' || updateVeg === true
   if (updates.isFeatured !== undefined) updates.isFeatured = updates.isFeatured === 'true' || updates.isFeatured === true
 
   const updated = await Food.findByIdAndUpdate(req.params.id, updates, {
@@ -119,6 +125,13 @@ export const deleteFood = async (req, res) => {
   const food = await Food.findById(req.params.id)
   if (!food) return errorResponse(res, 'Food not found.', 404)
   await food.deleteOne()
+
+  // Clean up any user carts referencing this food
+  await Cart.updateMany(
+    { 'items.food': req.params.id },
+    { $pull: { items: { food: req.params.id } } }
+  )
+
   return successResponse(res, {}, 'Food deleted')
 }
 

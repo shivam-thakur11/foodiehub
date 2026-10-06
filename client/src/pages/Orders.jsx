@@ -32,7 +32,7 @@ export default function Orders() {
       <h1 className="text-3xl font-bold text-gray-900 mb-8">My Orders</h1>
 
       {orders.length === 0 ? (
-        <EmptyState icon="📦" title="No orders yet" description="You haven't placed any orders. Start browsing our delicious menu!" actionLabel="Browse Menu" actionTo="/menu" />
+        <EmptyState title="No orders yet" description="You haven't placed any orders yet. Browse our menu to get started." actionLabel="Browse Menu" actionTo="/menu" />
       ) : (
         <div className="space-y-4">
           {orders.map(order => (

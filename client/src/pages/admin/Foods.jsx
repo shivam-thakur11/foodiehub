@@ -94,7 +94,7 @@ export default function AdminFoods() {
 
   const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); setFormErrors(e => ({ ...e, [k]: '' })) }
 
-  const fallback = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=60&h=60&fit=crop'
+  const fallback = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60' fill='%23f3f4f6'%3E%3Crect width='60' height='60' fill='%23f3f4f6'/%3E%3Ccircle cx='30' cy='30' r='14' fill='%23e5e7eb'/%3E%3C/svg%3E"
 
   return (
     <div className="space-y-5">

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, MapPin, CreditCard, CheckCircle, Circle, Clock } from 'lucide-react'
+import { ArrowLeft, MapPin, CreditCard, CheckCircle, Circle, Clock, Package } from 'lucide-react'
 import api from '../services/api'
 import { PageSpinner } from '../components/common/Spinner'
 
@@ -15,10 +15,6 @@ const STATUS_COLORS = {
   Cancelled: 'bg-red-100 text-red-700',
 }
 
-const STATUS_ICONS = {
-  Pending: '📋', Confirmed: '✅', Preparing: '👨‍🍳', 'Out for Delivery': '🛵', Delivered: '🎉',
-}
-
 export default function OrderDetails() {
   const { id } = useParams()
   const [order, setOrder] = useState(null)
@@ -27,7 +23,7 @@ export default function OrderDetails() {
   useEffect(() => {
     api.get(`/orders/${id}`)
       .then(r => setOrder(r.data.order))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false))
   }, [id])
 
@@ -77,7 +73,6 @@ export default function OrderDetails() {
                       {done ? <CheckCircle className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
                     </div>
                     <div className="text-center">
-                      <p className="text-xs">{STATUS_ICONS[status]}</p>
                       <p className={`text-[10px] font-semibold leading-tight ${done ? 'text-orange-500' : 'text-gray-400'}`}>
                         {status.replace('Out for ', '')}
                       </p>
@@ -91,8 +86,9 @@ export default function OrderDetails() {
       )}
 
       {isCancelled && (
-        <div className="bg-red-50 border border-red-100 rounded-2xl p-4 mb-6 text-sm text-red-600 font-medium">
-          ❌ This order has been cancelled.
+        <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-6 flex items-center gap-3">
+          <Package className="w-4 h-4 text-red-500 flex-shrink-0" />
+          <p className="text-sm text-red-600 font-medium">This order has been cancelled.</p>
         </div>
       )}
 
@@ -138,7 +134,7 @@ export default function OrderDetails() {
           <p className="text-sm text-gray-600">{order.deliveryAddress?.street}</p>
           <p className="text-sm text-gray-600">{order.deliveryAddress?.city}, {order.deliveryAddress?.state}</p>
           <p className="text-sm text-gray-600">{order.deliveryAddress?.pincode}</p>
-          {order.deliveryAddress?.phone && <p className="text-sm text-gray-500 mt-1">📞 {order.deliveryAddress.phone}</p>}
+          {order.deliveryAddress?.phone && <p className="text-sm text-gray-500 mt-1">{order.deliveryAddress.phone}</p>}
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">

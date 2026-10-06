@@ -12,7 +12,7 @@ export default function OrderSuccess() {
   useEffect(() => {
     api.get(`/orders/${id}`)
       .then(r => setOrder(r.data.order))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false))
   }, [id])
 
@@ -23,8 +23,8 @@ export default function OrderSuccess() {
       <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
         <CheckCircle className="w-10 h-10 text-green-500" />
       </div>
-      <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Order Placed! 🎉</h1>
-      <p className="text-gray-500 mb-2">Your delicious food is on its way!</p>
+      <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Order Confirmed</h1>
+      <p className="text-gray-500 mb-2">Your order has been placed successfully.</p>
       {order && <p className="text-sm text-gray-400 mb-8">Order ID: <span className="font-mono font-semibold text-gray-600">#{order._id?.slice(-8).toUpperCase()}</span></p>}
 
       {order && (

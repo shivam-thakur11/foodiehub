@@ -16,10 +16,10 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (food, qty = 1) => {
     setItems(prev => {
-      const existing = prev.find(i => i.food._id === food._id)
+      const existing = prev.find(i => String(i.food._id) === String(food._id))
       if (existing) {
         toast.success('Quantity updated!')
-        return prev.map(i => i.food._id === food._id ? { ...i, quantity: i.quantity + qty } : i)
+        return prev.map(i => String(i.food._id) === String(food._id) ? { ...i, quantity: i.quantity + qty } : i)
       }
       toast.success('Added to cart!')
       return [...prev, { food, quantity: qty }]
@@ -27,13 +27,13 @@ export const CartProvider = ({ children }) => {
   }
 
   const removeFromCart = (foodId) => {
-    setItems(prev => prev.filter(i => i.food._id !== foodId))
+    setItems(prev => prev.filter(i => String(i.food._id) !== String(foodId)))
     toast.success('Item removed')
   }
 
   const updateQty = (foodId, qty) => {
     if (qty <= 0) { removeFromCart(foodId); return }
-    setItems(prev => prev.map(i => i.food._id === foodId ? { ...i, quantity: qty } : i))
+    setItems(prev => prev.map(i => String(i.food._id) === String(foodId) ? { ...i, quantity: qty } : i))
   }
 
   const clearCart = () => setItems([])

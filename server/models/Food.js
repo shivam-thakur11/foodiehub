@@ -41,8 +41,16 @@ const foodSchema = new mongoose.Schema(
     isFeatured: { type: Boolean, default: false },
     preparationTime: { type: Number, default: 30 },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 )
+
+foodSchema.virtual('isVeg').get(function () {
+  return this.isVegetarian
+})
 
 foodSchema.methods.updateRating = function () {
   if (this.reviews.length === 0) {

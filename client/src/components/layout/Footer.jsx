@@ -74,7 +74,7 @@ export default function Footer() {
       <div className="border-t border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-gray-500">© 2024 FoodieHub. All rights reserved.</p>
-          <p className="text-xs text-gray-500">Made with ❤️ in India</p>
+          <p className="text-xs text-gray-500">Built in India</p>
         </div>
       </div>
     </footer>

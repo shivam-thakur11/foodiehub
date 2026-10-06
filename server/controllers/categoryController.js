@@ -14,14 +14,18 @@ export const getCategories = async (req, res) => {
 // @access  Admin
 export const createCategory = async (req, res) => {
   const { name, description } = req.body
-  const image = req.file ? `/uploads/${req.file.filename}` : ''
+  if (!name || !String(name).trim()) {
+    return errorResponse(res, 'Category name is required.', 400)
+  }
+
+  const image = req.file ? `/uploads/${req.file.filename}` : (req.body.image || '')
 
   // Escape regex special characters to prevent injection
-  const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const escapedName = String(name).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const existing = await Category.findOne({ name: { $regex: `^${escapedName}$`, $options: 'i' } })
   if (existing) return errorResponse(res, 'Category already exists.', 400)
 
-  const category = await Category.create({ name, description, image })
+  const category = await Category.create({ name: String(name).trim(), description, image })
   return successResponse(res, { category }, 'Category created', 201)
 }
 

@@ -95,12 +95,11 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Demo accounts */}
           <div className="mt-5 p-4 bg-gray-50 rounded-xl border border-gray-100">
-            <p className="text-xs font-semibold text-gray-500 mb-2">Demo accounts:</p>
+            <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Demo accounts</p>
             <div className="space-y-1 text-xs text-gray-600">
-              <p>👤 <strong>User:</strong> user@foodiehub.com / user123</p>
-              <p>🛡️ <strong>Admin:</strong> admin@foodiehub.com / admin123</p>
+              <p><strong>User:</strong> user@foodiehub.com / user123</p>
+              <p><strong>Admin:</strong> admin@foodiehub.com / admin123</p>
             </div>
           </div>
         </div>

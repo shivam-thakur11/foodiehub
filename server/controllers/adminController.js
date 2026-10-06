@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import Order from '../models/Order.js'
 import User from '../models/User.js'
 import Food from '../models/Food.js'
@@ -44,37 +45,43 @@ export const getAllOrders = async (req, res) => {
   const query = {}
   if (status) query.orderStatus = status
 
-  const pageNum = Math.max(1, parseInt(page))
-  const limitNum = Math.min(100, parseInt(limit))
+  const pageNum = Math.max(1, parseInt(page, 10) || 1)
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20))
   const skip = (pageNum - 1) * limitNum
 
-  let orders
-  let total
-
   if (search) {
-    // Text search on order ID suffix or populated user fields requires aggregation
-    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    const allOrders = await Order.find(query)
-      .sort({ createdAt: -1 })
-      .populate('user', 'name email phone')
+    const trimmed = String(search).trim()
+    const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const regex = new RegExp(escaped, 'i')
 
-    const filtered = allOrders.filter(o =>
-      o._id.toString().toLowerCase().includes(search.toLowerCase()) ||
-      o.user?.name?.toLowerCase().includes(escaped.toLowerCase()) ||
-      o.user?.email?.toLowerCase().includes(escaped.toLowerCase())
-    )
-    total = filtered.length
-    orders = filtered.slice(skip, skip + limitNum)
-  } else {
-    ;[orders, total] = await Promise.all([
-      Order.find(query)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limitNum)
-        .populate('user', 'name email phone'),
-      Order.countDocuments(query),
-    ])
+    // Find users matching search term
+    const matchingUsers = await User.find({
+      $or: [{ name: regex }, { email: regex }, { phone: regex }],
+    }).select('_id')
+    const matchingUserIds = matchingUsers.map((u) => u._id)
+
+    const orConditions = [{ user: { $in: matchingUserIds } }]
+
+    if (mongoose.Types.ObjectId.isValid(trimmed) && trimmed.length === 24) {
+      orConditions.push({ _id: new mongoose.Types.ObjectId(trimmed) })
+    }
+
+    if (query.orderStatus) {
+      query.$and = [{ orderStatus: query.orderStatus }, { $or: orConditions }]
+      delete query.orderStatus
+    } else {
+      query.$or = orConditions
+    }
   }
+
+  const [orders, total] = await Promise.all([
+    Order.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum)
+      .populate('user', 'name email phone'),
+    Order.countDocuments(query),
+  ])
 
   return successResponse(
     res,

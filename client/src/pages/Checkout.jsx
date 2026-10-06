@@ -67,7 +67,7 @@ export default function Checkout() {
         couponCode: appliedCoupon || undefined,
       })
       clearCart()
-      toast.success('Order placed successfully! 🎉')
+      toast.success('Order placed successfully.')
       navigate(`/order-success/${res.data.order._id}`)
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to place order')
@@ -142,7 +142,7 @@ export default function Checkout() {
                     <div>
                       <p className="text-sm font-semibold text-gray-800">{addr.label}</p>
                       <p className="text-sm text-gray-500">{addr.street}, {addr.city}, {addr.state} - {addr.pincode}</p>
-                      {addr.phone && <p className="text-xs text-gray-400 mt-0.5">📞 {addr.phone}</p>}
+                      {addr.phone && <p className="text-xs text-gray-400 mt-0.5">{addr.phone}</p>}
                     </div>
                   </label>
                 ))}
@@ -218,7 +218,7 @@ export default function Checkout() {
                 <div key={food._id} className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                     <img src={food.image} alt={food.name} className="w-full h-full object-cover"
-                      onError={e => { e.target.src = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=100&h=100&fit=crop' }} />
+                      onError={e => { e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23f3f4f6'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ccircle cx='50' cy='50' r='20' fill='%23e5e7eb'/%3E%3C/svg%3E" }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-800 truncate">{food.name}</p>
@@ -286,7 +286,7 @@ export default function Checkout() {
 
             <button onClick={handlePlaceOrder} disabled={placing}
               className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-70 text-white font-semibold py-3.5 rounded-2xl transition-colors flex items-center justify-center gap-2 shadow-sm">
-              {placing ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Placing order...</> : '🎉 Place Order'}
+              {placing ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Placing order...</> : 'Place Order'}
             </button>
           </div>
         </div>

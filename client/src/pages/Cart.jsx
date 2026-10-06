@@ -14,7 +14,7 @@ export default function Cart() {
 
   const tax = +(subtotal * TAX_RATE).toFixed(2)
   const total = subtotal + DELIVERY_FEE + tax
-  const fallback = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&h=200&fit=crop'
+  const fallback = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='%23f3f4f6'%3E%3Crect width='200' height='200' fill='%23f3f4f6'/%3E%3Ccircle cx='100' cy='90' r='35' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='160' font-family='system-ui, sans-serif' font-size='12' fill='%239ca3af' text-anchor='middle'%3EFoodieHub%3C/text%3E%3C/svg%3E"
 
   const handleCheckout = () => {
     if (!user) { navigate('/login', { state: { from: { pathname: '/checkout' } } }); return }
@@ -24,10 +24,12 @@ export default function Cart() {
   if (items.length === 0) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-        <div className="text-7xl mb-5">🛒</div>
+        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
+          <ShoppingBag className="w-8 h-8 text-gray-400" />
+        </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
-        <p className="text-gray-500 mb-8">Looks like you haven't added anything yet. Browse our menu and add something delicious!</p>
-        <Link to="/menu" className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-3.5 rounded-2xl transition-colors">
+        <p className="text-gray-500 mb-8 text-sm">Add something from the menu to get started.</p>
+        <Link to="/menu" className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-3.5 rounded-xl transition-colors">
           <ShoppingBag className="w-4 h-4" /> Browse Menu
         </Link>
       </div>
