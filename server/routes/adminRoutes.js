@@ -7,6 +7,7 @@ import {
   getAllUsers,
   updateUserRole,
   toggleUserStatus,
+  seedDatabase,
 } from '../controllers/adminController.js'
 
 const router = express.Router()
@@ -19,5 +20,6 @@ router.put('/orders/:id/status', updateOrderStatus)
 router.get('/users', getAllUsers)
 router.put('/users/:id/role', updateUserRole)
 router.put('/users/:id/toggle-status', toggleUserStatus)
+router.post('/seed', seedDatabase)
 
 export default router

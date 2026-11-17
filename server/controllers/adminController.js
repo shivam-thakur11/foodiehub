@@ -4,6 +4,7 @@ import User from '../models/User.js'
 import Food from '../models/Food.js'
 import Category from '../models/Category.js'
 import { successResponse, errorResponse } from '../utils/apiResponse.js'
+import { CATEGORIES, FOODS } from '../seed.js'
 
 // @desc    Get admin dashboard stats
 // @route   GET /api/admin/dashboard
@@ -187,4 +188,31 @@ export const toggleUserStatus = async (req, res) => {
     { user },
     `User ${user.isActive ? 'activated' : 'deactivated'} successfully`
   )
+}
+
+// @desc    Re-seed food and category data (safe — does NOT touch users/orders)
+// @route   POST /api/admin/seed
+// @access  Admin
+export const seedDatabase = async (req, res) => {
+  // Clear only Food and Category — never Users, Orders, or Carts
+  const [delCats, delFoods] = await Promise.all([
+    Category.deleteMany({}),
+    Food.deleteMany({}),
+  ])
+
+  // Insert categories
+  const insertedCats = await Category.insertMany(CATEGORIES)
+  const catMap = {}
+  insertedCats.forEach(cat => { catMap[cat.name] = cat._id })
+
+  // Insert foods
+  const foodDocs = FOODS(catMap)
+  const insertedFoods = await Food.insertMany(foodDocs)
+
+  return successResponse(res, {
+    deletedCategories: delCats.deletedCount,
+    deletedFoods: delFoods.deletedCount,
+    insertedCategories: insertedCats.length,
+    insertedFoods: insertedFoods.length,
+  }, `Seeded ${insertedCats.length} categories and ${insertedFoods.length} foods successfully`)
 }
