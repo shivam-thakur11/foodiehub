@@ -5,8 +5,15 @@
  * Passwords are plain text here — the User model's pre('save') hook
  * hashes them automatically. Do NOT pre-hash or logins will fail.
  */
+import path from 'path'
+import { fileURLToPath } from 'url'
 import dotenv from 'dotenv'
-dotenv.config()
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+dotenv.config({ path: path.resolve(__dirname, '.env'), override: true })
+
 
 import mongoose from 'mongoose'
 import User from './models/User.js'
@@ -660,7 +667,12 @@ export const FOODS = (c) => [
 
 async function seed() {
   try {
-    const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/foodiehub'
+    const uri = process.env.MONGO_URI
+    if (!uri) {
+      console.error('❌ MONGO_URI environment variable is not defined.')
+      process.exit(1)
+    }
+
     await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 })
     console.log('Connected to MongoDB ✅')
 
